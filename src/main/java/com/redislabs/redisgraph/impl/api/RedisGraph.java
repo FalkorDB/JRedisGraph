@@ -54,7 +54,7 @@ public class RedisGraph extends AbstractRedisGraph implements RedisGraphContextG
     }
 
     public RedisGraph(JedisCluster jedis) {
-        this.connection = null;
+        this.connection = new ClusterConnection(jedis);
         this.pool = null;
     }
 
