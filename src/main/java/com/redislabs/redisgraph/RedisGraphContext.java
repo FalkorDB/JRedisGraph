@@ -1,7 +1,5 @@
 package com.redislabs.redisgraph;
 
-import redis.clients.jedis.Jedis;
-
 public interface RedisGraphContext extends RedisGraph {
 
 
@@ -9,7 +7,7 @@ public interface RedisGraphContext extends RedisGraph {
      * Returns implementing class connection context
      * @return Jedis connection
      */
-    Jedis getConnectionContext();
+    Connection getConnectionContext();
 
     /**
      * Returns a Redis transactional object, over the connection context, with graph API capabilities

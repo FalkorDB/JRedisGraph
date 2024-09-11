@@ -1,9 +1,9 @@
 package com.redislabs.redisgraph.impl.api;
 
+import com.redislabs.redisgraph.Connection;
 import com.redislabs.redisgraph.RedisGraph;
 import com.redislabs.redisgraph.ResultSet;
 import com.redislabs.redisgraph.impl.Utils;
-import redis.clients.jedis.Jedis;
 
 import java.util.List;
 import java.util.Map;
@@ -15,9 +15,9 @@ public abstract class AbstractRedisGraph implements RedisGraph {
 
     /**
      * Inherited classes should return a Jedis connection, with respect to their context
-     * @return Jedis connection
+     * @return connection
      */
-    protected abstract Jedis getConnection();
+    protected abstract Connection getConnection();
 
     /**
      * Sends a query to the redis graph. Implementation and context dependent
