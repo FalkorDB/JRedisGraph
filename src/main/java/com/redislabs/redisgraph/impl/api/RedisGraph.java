@@ -1,11 +1,13 @@
 package com.redislabs.redisgraph.impl.api;
 
+import com.redislabs.redisgraph.Connection;
 import com.redislabs.redisgraph.RedisGraphContext;
 import com.redislabs.redisgraph.RedisGraphContextGenerator;
 import com.redislabs.redisgraph.ResultSet;
 import com.redislabs.redisgraph.impl.graph_cache.RedisGraphCaches;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.util.Pool;
 import redis.clients.jedis.util.SafeEncoder;
 
@@ -15,7 +17,7 @@ import redis.clients.jedis.util.SafeEncoder;
 public class RedisGraph extends AbstractRedisGraph implements RedisGraphContextGenerator {
 
     private final Pool<Jedis> pool;
-    private final Jedis jedis;
+    private final Connection connection;
     private final RedisGraphCaches caches = new RedisGraphCaches();
 
     /**
@@ -43,11 +45,16 @@ public class RedisGraph extends AbstractRedisGraph implements RedisGraphContextG
      */
     public RedisGraph(Pool<Jedis> pool) {
         this.pool = pool;
-        this.jedis = null;
+        this.connection = null;
     }
 
     public RedisGraph(Jedis jedis) {
-        this.jedis = jedis;
+        this.connection = new SingleConnection(jedis);
+        this.pool = null;
+    }
+
+    public RedisGraph(JedisCluster jedis) {
+        this.connection = null;
         this.pool = null;
     }
 
@@ -56,8 +63,8 @@ public class RedisGraph extends AbstractRedisGraph implements RedisGraphContextG
      * @return a Jedis connection
      */
     @Override
-    protected Jedis getConnection() {
-        return jedis != null ? jedis : pool.getResource();
+    protected Connection getConnection() {
+        return pool == null ? connection : new SingleConnection(pool.getResource());
     }
 
     /**
@@ -123,15 +130,15 @@ public class RedisGraph extends AbstractRedisGraph implements RedisGraphContextG
     }
 
     /**
-     * Closes the Jedis pool
+     * Closes all the connections
      */
     @Override
     public void close() {
         if (pool != null) {
             pool.close();
         }
-        if (jedis != null) {
-            jedis.close();
+        if (connection != null) {
+            connection.disconnect();
         }
     }
 
@@ -142,7 +149,7 @@ public class RedisGraph extends AbstractRedisGraph implements RedisGraphContextG
      */
     @Override
     public String deleteGraph(String graphId) {
-        try (Jedis conn = getConnection()) {
+        try (Connection conn = getConnection()) {
             Object response = conn.sendCommand(RedisGraphCommand.DELETE, graphId);
             //clear local state
             caches.removeGraphCache(graphId);
