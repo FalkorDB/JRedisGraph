@@ -64,7 +64,7 @@ public class RedisGraph extends AbstractRedisGraph implements RedisGraphContextG
      */
     @Override
     protected Connection getConnection() {
-        return pool == null ? connection : new SingleConnection(pool.getResource());
+        return pool == null ? connection : new PooledConnection(pool.getResource());
     }
 
     /**

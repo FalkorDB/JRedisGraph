@@ -150,10 +150,12 @@ public class RedisGraphAPITest {
         Assert.assertNotNull(createNonExistingIndexResult.getStatistics().getStringValue(Label.INDICES_ADDED));
         Assert.assertEquals(1, createNonExistingIndexResult.getStatistics().indicesAdded());
 
-        ResultSet createExistingIndexResult = client.query("social", "CREATE INDEX ON :person(age)");
-        Assert.assertFalse(createExistingIndexResult.hasNext());
-        Assert.assertNotNull(createExistingIndexResult.getStatistics().getStringValue(Label.INDICES_ADDED));
-        Assert.assertEquals(0, createExistingIndexResult.getStatistics().indicesAdded());
+        try {
+            ResultSet createExistingIndexResult = client.query("social", "CREATE INDEX ON :person(age)");
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertTrue(e.getMessage().contains("Attribute 'age' is already indexed"));
+        }
 
         ResultSet deleteExistingIndexResult = client.query("social", "DROP INDEX ON :person(age)");
         Assert.assertFalse(deleteExistingIndexResult.hasNext());
