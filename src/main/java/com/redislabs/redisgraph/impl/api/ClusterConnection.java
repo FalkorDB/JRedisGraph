@@ -18,11 +18,21 @@ public class ClusterConnection implements Connection {
 
     @Override
     public Object sendCommand(ProtocolCommand cmd, String... args) {
+
+        if (args.length == 0) {
+            return cluster.sendCommand("k", cmd, args);                
+        }
+
         return cluster.sendCommand(args[0], cmd, args);
     }
 
     @Override
     public Object sendBlockingCommand(ProtocolCommand cmd, String... args) {
+
+        if (args.length == 0) {
+            return cluster.sendBlockingCommand("k", cmd, args);                
+        }
+
         return cluster.sendBlockingCommand(args[0], cmd, args);
     }
 
